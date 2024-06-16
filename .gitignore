@@ -1,4 +1,5 @@
 /venv
+/uploads
 /.vs
 /.vscode
 .vscode/settings.json

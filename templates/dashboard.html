@@ -9,5 +9,14 @@
     <h1>hello you are logged in</h1>
     <a href="{{url_for('upload_file')}}">Upload file</a><br>
     <a href="{{url_for('logout')}}">Log Out</a>
+{% if data %}
+    {% for file in data %}
+    <h4>{{file.id}}</h4>
+    <h4>{{file.filename}}</h4>
+    <h4>{{file.filepath}}</h4>
+    <a href="{{url_for('download', filename=file.filename)}}">downlaod this file</a>
+    <hr>
+    {% endfor %}
+{% endif %}
 </body>
 </html>

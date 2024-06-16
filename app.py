@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, url_for, redirect
+from flask import Flask, render_template, request, session, url_for, redirect, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_required, login_user, LoginManager, logout_user
 from flask_wtf import FlaskForm
@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
 
-class File(db.Model):
+class FileClass(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     filepath = db.Column(db.String(255), nullable=False)
@@ -96,7 +96,8 @@ def register():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-        return render_template('dashboard.html')
+    files = FileClass.query.all()
+    return render_template('dashboard.html', data = files)
 
 #logout function
 @app.route('/logout') 
@@ -110,10 +111,17 @@ def upload_file():
     form = FileForm()
     if form.validate_on_submit():
         file = form.file.data
-        filename = file.filename
-        file.save(os.path.join('uploads', filename))
+        filenamee = file.filename
+        file.save(os.path.join('uploads', filenamee))
+        new_file = FileClass(filename = filenamee, filepath = os.path.join('uploads', filenamee))
+        db.session.add(new_file)
+        db.session.commit()
         return redirect(url_for('dashboard'))
     return render_template('upload.html', form = form)
-            
+
+@app.route('/download/<filename>')
+def download(filename):
+    return send_from_directory('uploads', filename, as_attachment = True)
+
 if __name__ == "__main__":
     app.run(debug=True)
