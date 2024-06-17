@@ -13,6 +13,7 @@
     {% for file in data %}
     <h4>{{file.id}}</h4>
     <h4>{{file.filename}}</h4>
+    <h4>{{file.owner}}</h4>
     <h4>{{file.filepath}}</h4>
     <a href="{{url_for('download', filename=file.filename)}}">downlaod this file</a>
     <hr>

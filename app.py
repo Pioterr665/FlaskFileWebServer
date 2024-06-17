@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_required, login_user, LoginManager, logout_user
+from flask_login import UserMixin, login_required, login_user, LoginManager, logout_user, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import StringField, PasswordField, SubmitField
@@ -32,6 +32,7 @@ class User(db.Model, UserMixin):
 class FileClass(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
+    owner = db.Column(db.String(255), nullable=False)
     filepath = db.Column(db.String(255), nullable=False)
 
 #this funckton creates tables in database
@@ -109,13 +110,16 @@ def logout():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     form = FileForm()
+    if current_user.is_authenticated:
+        user = current_user.username
     if form.validate_on_submit():
         file = form.file.data
         filenamee = file.filename
         file.save(os.path.join('uploads', filenamee))
-        new_file = FileClass(filename = filenamee, filepath = os.path.join('uploads', filenamee))
+        new_file = FileClass(filename = filenamee, owner = user, filepath = os.path.join('uploads', filenamee))
         db.session.add(new_file)
         db.session.commit()
+        
         return redirect(url_for('dashboard'))
     return render_template('upload.html', form = form)
 
