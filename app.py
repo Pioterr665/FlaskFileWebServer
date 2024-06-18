@@ -65,9 +65,9 @@ def laod_user(user_id):
     return User.query.get(int(user_id))
 
 #index page
-@app.route("/")
-def index():
-    return render_template('index.html')
+# @app.route("/")
+# def index():
+#     return render_template('index.html')
 
 #login function with LoginManager
 @app.route("/login", methods=['GET', 'POST'])
@@ -97,15 +97,16 @@ def register():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
+    user = current_user.username
     files = FileClass.query.all()
-    return render_template('dashboard.html', data = files)
+    return render_template('dashboard.html', data = files, user = user)
 
 #logout function
 @app.route('/logout') 
 @login_required       
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
@@ -126,6 +127,15 @@ def upload_file():
 @app.route('/download/<filename>')
 def download(filename):
     return send_from_directory('uploads', filename, as_attachment = True)
+
+@app.route('/delete/<id>')
+def delete(id):
+    file = db.session.get(FileClass, id)
+    db.session.delete(file)
+    db.session.commit()
+    os.remove(os.path.join('uploads', file.filename))
+    return redirect(url_for('dashboard'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
