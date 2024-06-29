@@ -35,7 +35,7 @@ class FileClass(db.Model):
     owner = db.Column(db.String(255), nullable=False)
     filepath = db.Column(db.String(255), nullable=False)
 
-#this funckton creates tables in database
+#this function creates tables in database
 with app.app_context():
     db.create_all()
     
@@ -94,7 +94,7 @@ def register():
     return render_template('register.html', form = form)
 
 #dashboard page
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     user = current_user.username
@@ -109,6 +109,7 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/upload', methods=['GET', 'POST'])
+@login_required 
 def upload_file():
     form = FileForm()
     if current_user.is_authenticated:
@@ -125,10 +126,12 @@ def upload_file():
     return render_template('upload.html', form = form)
 
 @app.route('/download/<filename>')
+@login_required 
 def download(filename):
     return send_from_directory('uploads', filename, as_attachment = True)
 
 @app.route('/delete/<id>')
+@login_required 
 def delete(id):
     file = db.session.get(FileClass, id)
     db.session.delete(file)
@@ -138,4 +141,4 @@ def delete(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
